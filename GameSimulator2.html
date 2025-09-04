@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Master - Imágenes y Palabras</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            color: #ffdd00;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+         /* Botón de menú principal */
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* Pantallas del juego */
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        /* Menú principal */
+        .main-menu {
+            text-align: center;
+        }
+        
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .menu-btn {
+            padding: 16px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            background: linear-gradient(to right, #3494e6, #ec6ead);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .menu-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Información del juego */
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            display: flex;
+            flex-direction: column;
+            padding: 0 15px;
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #ffdd00;
+        }
+        
+        /* Tablero de juego */
+        .game-board {
+            display: grid;
+            gap: 10px;
+            margin: 0 auto 25px;
+            perspective: 1000px;
+        }
+        
+        .card {
+            height: 120px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .card-front {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            transform: rotateY(180deg);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            padding: 5px;
+            text-align: center;
+            flex-direction: column;
+        }
+        
+        .card-front.text-card {
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+            color: white;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        
+        .card-front.image-card {
+            padding: 5px;
+            background: white;
+        }
+        
+        .card-front.image-card img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b);
+            font-size: 2rem;
+            color: white;
+        }
+        
+        /* Controles */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(to right, #3494e6, #ec6ead);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .control-btn.pause {
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+        }
+        
+        /* Mensaje de nivel completado */
+        .level-complete {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+        
+        .level-complete.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .level-content {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .level-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ffdd00;
+        }
+        
+        .level-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .level-stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffdd00;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        /* Confeti */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0.8;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .info-box {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 10px;
+            }
+            
+            .card {
+                height: 100px;
+            }
+            
+            .card-front.text-card {
+                font-size: 1.1rem;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                height: 90px;
+            }
+            
+            .card-back {
+                font-size: 1.5rem;
+            }
+            
+            .card-front.text-card {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .game-board {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+
+          <!-- Botón de menú principal (AHORA VISIBLE EN TODAS LAS PANTALLAS) -->
+        <button class="home-btn" id="home-btn">
+            <i class="fas fa-home"></i>
+        </button>
+
+        <h1><i class="fas fa-brain"></i> Memory Master</h1>
+        <p class="subtitle">Find the pair between words and images</p>
+        
+        <!-- Pantalla de Menú Principal -->
+        <div class="screen main-menu active" id="menu-screen">
+            <div class="menu-buttons">
+                <button class="menu-btn" id="start-btn"><i class="fas fa-play"></i> Start Game</button>
+                <button class="menu-btn" id="instructions-btn"><i class="fas fa-book"></i> Instructions</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Juego -->
+        <div class="screen" id="game-screen">
+            <div class="game-info">
+                <div class="info-box">
+                    <span class="info-label">Level</span>
+                    <span class="info-value" id="level">1</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Time</span>
+                    <span class="info-value" id="timer">0s</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Points</span>
+                    <span class="info-value" id="points">0</span>
+                </div>
+            </div>
+            
+            <div class="game-board" id="game-board"></div>
+            
+            <div class="controls">
+                <button class="control-btn pause" id="pause-btn"><i class="fas fa-pause"></i> Pause</button>
+                <button class="control-btn" id="hint-btn"><i class="fas fa-lightbulb"></i> Clue</button>
+                <button class="control-btn" id="menu-btn"><i class="fas fa-home"></i> Menu</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Pausa -->
+        <div class="screen" id="pause-screen">
+            <h2>Juego en Pausa</h2>
+            <div class="controls">
+                <button class="control-btn" id="resume-btn"><i class="fas fa-play"></i> Continue</button>
+                <button class="control-btn" id="restart-btn"><i class="fas fa-redo"></i> Restart Level</button>
+                <button class="control-btn" id="main-menu-btn"><i class="fas fa-home"></i> Main Menu</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Instrucciones -->
+        <div class="screen" id="instructions-screen">
+            <h2>Instrucciones</h2>
+            <div style="text-align: left; margin: 20px 0; line-height: 1.6;">
+                <p><i class="fas fa-check-circle"></i> Find the pairs between English words and images.</p>
+                <p><i class="fas fa-check-circle"></i> Each level has more cards and less time.</p>
+                <p><i class="fas fa-check-circle"></i> You earn points based on your speed.</p>
+                <p><i class="fas fa-check-circle"></i> Use the hint button if you need help (reduces points).</p>
+                <p><i class="fas fa-check-circle"></i> Complete all 50 levels to become a Memory Master!</p>
+            </div>
+            <button class="control-btn" id="back-btn"><i class="fas fa-arrow-left"></i> Back to Menu</button>
+        </div>
+    </div>
+    
+    <!-- Mensaje de Nivel Completado -->
+    <div class="level-complete" id="level-complete">
+        <div class="level-content">
+            <h2>Nivel Completo! <i class="fas fa-trophy"></i></h2>
+            
+            <div class="level-stats">
+                <div class="level-stat">
+                    <div class="stat-value" id="complete-time">0</div>
+                    <div class="stat-label">Segundos</div>
+                </div>
+                <div class="level-stat">
+                    <div class="stat-value" id="complete-points">0</div>
+                    <div class="stat-label">Puntos</div>
+                </div>
+                <div class="level-stat">
+                    <div class="stat-value" id="complete-level">1</div>
+                    <div class="stat-label">Nivel</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" id="next-level-btn">Next Level <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementos del DOM
+            const menuScreen = document.getElementById('menu-screen');
+            const gameScreen = document.getElementById('game-screen');
+            const pauseScreen = document.getElementById('pause-screen');
+            const instructionsScreen = document.getElementById('instructions-screen');
+            const levelComplete = document.getElementById('level-complete');
+            
+            const gameBoard = document.getElementById('game-board');
+            const levelElement = document.getElementById('level');
+            const timerElement = document.getElementById('timer');
+            const pointsElement = document.getElementById('points');
+              const homeBtn = document.getElementById('home-btn');
+            
+            const startBtn = document.getElementById('start-btn');
+            const instructionsBtn = document.getElementById('instructions-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resumeBtn = document.getElementById('resume-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const hintBtn = document.getElementById('hint-btn');
+            const menuBtn = document.getElementById('menu-btn');
+            const mainMenuBtn = document.getElementById('main-menu-btn');
+            const backBtn = document.getElementById('back-btn');
+            const nextLevelBtn = document.getElementById('next-level-btn');
+            
+            const completeTime = document.getElementById('complete-time');
+            const completePoints = document.getElementById('complete-points');
+            const completeLevel = document.getElementById('complete-level');
+            
+            // Variables del juego
+            let cards = [];
+            let hasFlippedCard = false;
+            let lockBoard = false;
+            let firstCard, secondCard;
+            let level = 1;
+            let time = 0;
+            let points = 0;
+            let timerInterval;
+            let gamePaused = false;
+            let usedWords = new Set();
+            
+            // Diccionario de palabras con sus imágenes correspondientes (CORREGIDO)
+            const wordImageDictionary = [
+                { word: "Apple", image: "https://images.unsplash.com/photo-1630563451961-ac2ff27616ab?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Banana", image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Cat", image: "https://plus.unsplash.com/premium_photo-1667030474693-6d0632f97029?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Dog", image: "https://plus.unsplash.com/premium_photo-1694819488591-a43907d1c5cc?q=80&w=714&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Elephant", image: "https://plus.unsplash.com/premium_photo-1661810056990-57be781caa2d?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Flower", image: "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Sun", image: "https://images.unsplash.com/photo-1563630381190-77c336ea545a?q=80&w=689&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Moon", image: "https://images.unsplash.com/photo-1522030299830-16b8d3d049fe?q=80&w=1073&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Star", image: "https://plus.unsplash.com/premium_photo-1661764559771-8f78623b352c?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Tree", image: "https://images.unsplash.com/photo-1528183429752-a97d0bf99b5a?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "House", image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Car", image: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Book", image: "https://plus.unsplash.com/premium_photo-1669652639337-c513cc42ead6?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Ball", image: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Fish", image: "https://images.unsplash.com/photo-1578507065211-1c4e99a5fd24?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Bird", image: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?q=80&w=725&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Clock", image: "https://images.unsplash.com/photo-1415604934674-561df9abf539?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Heart", image: "https://plus.unsplash.com/premium_photo-1677102356484-0f1b182a3acf?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Cloud", image: "https://images.unsplash.com/photo-1511747779856-fd751a79aa22?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Key", image: "https://images.unsplash.com/photo-1584985429926-08867327d3a6?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Laptop", image: "https://plus.unsplash.com/premium_photo-1681702156223-ea59bfbf1065?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Phone", image: "https://images.unsplash.com/photo-1608610026254-da1c4f08ce9d?q=80&w=1331&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Music", image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Pencil", image: "https://plus.unsplash.com/premium_photo-1667984733216-9c38d3d308eb?q=80&w=715&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "School", image: "https://images.unsplash.com/photo-1519406596751-0a3ccc4937fe?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Ship", image: "https://images.unsplash.com/photo-1527685609591-44b0aef2400b?q=80&w=1933&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Train", image: "https://images.unsplash.com/photo-1527295110-5145f6b148d0?q=80&w=1131&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Umbrella", image: "https://plus.unsplash.com/premium_photo-1664303020217-29f776002c7c?q=80&w=736&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Water", image: "https://images.unsplash.com/photo-1530053969600-caed2596d242?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Fire", image: "https://images.unsplash.com/photo-1470549584009-d347338fc0ff?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Chair", image: "https://images.unsplash.com/photo-1506326426992-32b61983f2fd?q=80&w=686&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Table", image: "https://images.unsplash.com/photo-1565791380713-1756b9a05343?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Window", image: "https://images.unsplash.com/photo-1527352774566-e4916e36c645?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Door", image: "https://images.unsplash.com/photo-1577670552647-6ce12a463e7d?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Mountain", image: "https://plus.unsplash.com/premium_photo-1676218968741-8179dd7e533f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "River", image: "https://images.unsplash.com/photo-1519852476561-ec618b0183ba?q=80&w=1156&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Beach", image: "https://plus.unsplash.com/premium_photo-1669750817438-3f7f3112de8d?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Forest", image: "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "City", image: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=1244&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Street", image: "https://images.unsplash.com/photo-1482859454392-1b5326395032?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Bicycle", image: "https://images.unsplash.com/photo-1727281625114-ec5a30251be8?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Airplane", image: "https://images.unsplash.com/photo-1523833082115-1e8e294bd14e?q=80&w=1295&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Camera", image: "https://images.unsplash.com/photo-1510127034890-ba27508e9f1c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Cup", image: "https://images.unsplash.com/photo-1570784332176-fdd73da66f03?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Plate", image: "https://plus.unsplash.com/premium_photo-1661349883108-3aea72f4a83f?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Spoon", image: "https://images.unsplash.com/photo-1591872203534-278fc084969e?q=80&w=1064&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Fork", image: "https://plus.unsplash.com/premium_photo-1714675739640-c644f509baac?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Knife", image: "https://images.unsplash.com/photo-1593618229012-8aaad1cfefc3?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Bread", image: "https://plus.unsplash.com/premium_photo-1664640733898-d5c3f71f44e1?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Cheese", image: "https://images.unsplash.com/photo-1683314573422-649a3c6ad784?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Egg", image: "https://images.unsplash.com/photo-1536816579748-4ecb3f03d72a?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Milk", image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Juice", image: "https://images.unsplash.com/photo-1603569283847-aa295f0d016a?q=80&w=1072&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Pizza", image: "https://plus.unsplash.com/premium_photo-1673439304183-8840bd0dc1bf?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Salad", image: "https://plus.unsplash.com/premium_photo-1673590981774-d9f534e0c617?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "IceCream", image: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Cookie", image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Balloons", image: "https://images.unsplash.com/photo-1509909756405-be0199881695?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Kite", image: "https://images.unsplash.com/photo-1489011397388-494518edf378?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Rainbow", image: "https://images.unsplash.com/photo-1540962219877-4a59fa8105ad?q=80&w=988&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Snow", image: "https://plus.unsplash.com/premium_photo-1663090593977-9923cc536f3b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Rain", image: "https://images.unsplash.com/photo-1527766833261-b09c3163a791?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Lightning", image: "https://images.unsplash.com/photo-1429552077091-836152271555?q=80&w=685&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Sand", image: "https://plus.unsplash.com/premium_photo-1673649934365-6bcbe97ffe77?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Shell", image: "https://images.unsplash.com/photo-1530216088905-4007f55c6170?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Backpack", image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Notebook", image: "https://images.unsplash.com/photo-1501618669935-18b6ecb13d6d?q=80&w=1149&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Crayon", image: "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Scissors", image: "https://plus.unsplash.com/premium_photo-1676586309668-b3beaea46e99?q=80&w=688&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Ruler", image: "https://plus.unsplash.com/premium_photo-1715107534813-36bf77cb740a?q=80&w=765&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Map", image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Globe", image: "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Planet", image: "https://images.unsplash.com/photo-1614732414444-096e5f1122d5?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Rocket", image: "https://images.unsplash.com/photo-1517976487492-5750f3195933?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Robot", image: "https://images.unsplash.com/photo-1507146153580-69a1fe6d8aa1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Dinosaur", image: "https://images.unsplash.com/photo-1525877442103-5ddb2089b2bb?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Butterfly", image: "https://plus.unsplash.com/premium_photo-1710462716386-08fe07bb3c61?q=80&w=1005&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Bee", image: "https://images.unsplash.com/photo-1568526381923-caf3fd520382?q=80&w=1169&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Horse", image: "https://plus.unsplash.com/premium_photo-1661886008804-9e5b219fc587?q=80&w=903&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Lion", image: "https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?q=80&w=786&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Tiger", image: "https://images.unsplash.com/photo-1615963244664-5b845b2025ee?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Zebra", image: "https://images.unsplash.com/photo-1526319238109-524eecb9b913?q=80&w=1124&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Giraffe", image: "https://plus.unsplash.com/premium_photo-1661813434310-98cca4c9135e?q=80&w=1167&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Monkey", image: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=1176&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Frog", image: "https://images.unsplash.com/photo-1545006398-2cf47cd87b90?q=80&w=665&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Turtle", image: "https://images.unsplash.com/photo-1437622368342-7a3d73a34c8f?q=80&w=928&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Shark", image: "https://images.unsplash.com/photo-1560275619-4662e36fa65c?q=80&w=900&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Whale", image: "https://images.unsplash.com/photo-1568430462989-44163eb1752f?q=80&w=1173&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Octopus", image: "https://plus.unsplash.com/premium_photo-1723733104322-827186b5eb9e?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Starfish", image: "https://plus.unsplash.com/premium_photo-1693932440279-50a3466eac5c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Volcano", image: "https://images.unsplash.com/photo-1619266465172-02a857c3556d?q=80&w=1031&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Desert", image: "https://plus.unsplash.com/premium_photo-1671611799147-68a4f9b3f0e1?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Cave", image: "https://images.unsplash.com/photo-1532980216874-21f93fa9fd15?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Bridge", image: "https://images.unsplash.com/photo-1429041966141-44d228a42775?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Castle", image: "https://images.unsplash.com/photo-1449452198679-05c7fd30f416?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Farm", image: "https://images.unsplash.com/photo-1444858291040-58f756a3bdd6?q=80&w=1078&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Garden", image: "https://images.unsplash.com/photo-1601654253194-260e0b6984f9?q=80&w=1099&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Market", image: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Library", image: "https://images.unsplash.com/photo-1652305489491-789257d2e95c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Hospital", image: "https://images.unsplash.com/photo-1512102438733-bfa4ed29aef7?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Police", image: "https://images.unsplash.com/photo-1485056616736-b0840bdf4732?q=80&w=1191&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Firefighter", image: "https://images.unsplash.com/photo-1575867094974-9e16b6f55360?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Doctor", image: "https://plus.unsplash.com/premium_photo-1658506671316-0b293df7c72b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Nurse", image: "https://images.unsplash.com/photo-1584432810601-6c7f27d2362b?q=80&w=1083&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Teacher", image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Student", image: "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Family", image: "https://plus.unsplash.com/premium_photo-1661475916373-5aaaeb4a5393?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Baby", image: "https://images.unsplash.com/photo-1510154221590-ff63e90a136f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Friend", image: "https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Smile", image: "https://images.unsplash.com/photo-1489278353717-f64c6ee8a4d2?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Hands", image: "https://images.unsplash.com/photo-1542887800-faca0261c9e1?q=80&w=727&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Sports", image: "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?q=80&w=1007&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Soccer", image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Basketball", image: "https://images.unsplash.com/photo-1515523110800-9415d13b84a8?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Tennis", image: "https://plus.unsplash.com/premium_photo-1666913667082-c1fecc45275d?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Swim", image: "https://images.unsplash.com/photo-1706842137122-44e83b7cf149?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Run", image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Jump", image: "https://images.unsplash.com/photo-1491609154219-ffd3ffafd992?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Read", image: "https://images.unsplash.com/photo-1531879251-3da65dd78c99?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Write", image: "https://images.unsplash.com/photo-1491309055486-24ae511c15c7?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Draw", image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1073&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Sing", image: "https://images.unsplash.com/photo-1522863602463-afebb8886ab2?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+                { word: "Dance", image: "https://images.unsplash.com/photo-1504609813442-a8924e83f76e?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" }
+                ];
+            
+            // Inicializar eventos
+            function initEvents() {
+                startBtn.addEventListener('click', startGame);
+                instructionsBtn.addEventListener('click', showInstructions);
+                pauseBtn.addEventListener('click', pauseGame);
+                resumeBtn.addEventListener('click', resumeGame);
+                restartBtn.addEventListener('click', restartLevel);
+                hintBtn.addEventListener('click', showHint);
+                menuBtn.addEventListener('click', backToMenu);
+                mainMenuBtn.addEventListener('click', backToMenu);
+                backBtn.addEventListener('click', backToMenuFromInstructions);
+                nextLevelBtn.addEventListener('click', nextLevel);
+                homeBtn.addEventListener('click', backToMenu);
+            }
+            
+            // Cambiar pantalla
+            function showScreen(screen) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                screen.classList.add('active');
+            }
+            
+            // Iniciar juego
+            function startGame() {
+                level = 1;
+                points = 0;
+                usedWords.clear();
+                showScreen(gameScreen);
+                startLevel();
+            }
+            
+            // Mostrar instrucciones
+            function showInstructions() {
+                showScreen(instructionsScreen);
+            }
+            
+            // Volver al menú desde instrucciones
+            function backToMenuFromInstructions() {
+                showScreen(menuScreen);
+            }
+
+                        // Volver al menú principal
+            function backToMenu() {
+                clearInterval(timerInterval);
+                showScreen(menuScreen);
+                window.location.href = 'index.html';
+            }
+            
+
+            
+            // Pausar juego
+            function pauseGame() {
+                gamePaused = true;
+                clearInterval(timerInterval);
+                showScreen(pauseScreen);
+            }
+            
+            // Reanudar juego
+            function resumeGame() {
+                gamePaused = false;
+                showScreen(gameScreen);
+                startTimer();
+            }
+            
+            // Reiniciar nivel
+            function restartLevel() {
+                clearInterval(timerInterval);
+                time = 0;
+                updateStats();
+                startLevel();
+                showScreen(gameScreen);
+            }
+            
+            // Iniciar nivel
+            function startLevel() {
+                // Calcular número de pares según nivel (mínimo 3, máximo 10 pares)
+                const pairs = Math.min(3 + Math.floor(level / 3), 10);
+                
+                // Limpiar tablero
+                gameBoard.innerHTML = '';
+                const columns = pairs <= 6 ? 4 : 5;
+                gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+                
+                // Obtener palabras para este nivel (no repetidas de niveles anteriores)
+                const availableItems = wordImageDictionary.filter(item => !usedWords.has(item.word));
+                const levelItems = availableItems.sort(() => 0.5 - Math.random()).slice(0, pairs);
+                
+                // Añadir palabras usadas
+                levelItems.forEach(item => usedWords.add(item.word));
+                
+                // Crear cartas (texto e imagen para cada palabra)
+                const cardValues = [];
+                
+                levelItems.forEach(item => {
+                    // Carta de texto
+                    cardValues.push({
+                        type: 'text',
+                        value: item.word,
+                        matchValue: item.word,
+                        image: item.image
+                    });
+                    
+                    // Carta de imagen
+                    cardValues.push({
+                        type: 'image',
+                        value: item.image,
+                        matchValue: item.word,
+                        word: item.word
+                    });
+                });
+                
+                // Mezclar cartas
+                const shuffledCards = cardValues.sort(() => 0.5 - Math.random());
+                
+                // Crear cartas en el DOM
+                shuffledCards.forEach(cardData => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    card.dataset.matchValue = cardData.matchValue;
+                    
+                    const cardFront = document.createElement('div');
+                    cardFront.classList.add('card-front');
+                    
+                    if (cardData.type === 'text') {
+                        cardFront.classList.add('text-card');
+                        cardFront.textContent = cardData.value;
+                        cardFront.title = cardData.value; // Tooltip para ver la palabra completa
+                    } else {
+                        cardFront.classList.add('image-card');
+                        const img = document.createElement('img');
+                        img.src = cardData.value;
+                        img.alt = cardData.word; // Texto alternativo correcto
+                        img.title = cardData.word; // Tooltip con la palabra
+                        cardFront.appendChild(img);
+                    }
+                    
+                    const cardBack = document.createElement('div');
+                    cardBack.classList.add('card-back');
+                    cardBack.innerHTML = '<i class="fas fa-question"></i>';
+                    
+                    card.appendChild(cardFront);
+                    card.appendChild(cardBack);
+                    
+                    card.addEventListener('click', flipCard);
+                    gameBoard.appendChild(card);
+                    
+                    cards.push(card);
+                });
+                
+                // Iniciar temporizador
+                startTimer();
+                
+                // Actualizar estadísticas
+                updateStats();
+            }
+            
+            // Voltear carta
+            function flipCard() {
+                if (lockBoard || gamePaused) return;
+                if (this === firstCard) return;
+                
+                this.classList.add('flipped');
+                
+                if (!hasFlippedCard) {
+                    // Primer click
+                    hasFlippedCard = true;
+                    firstCard = this;
+                    return;
+                }
+                
+                // Segundo click
+                secondCard = this;
+                checkForMatch();
+            }
+            
+            // Comprobar coincidencia
+            function checkForMatch() {
+                const isMatch = firstCard.dataset.matchValue === secondCard.dataset.matchValue;
+                
+                if (isMatch) {
+                    disableCards();
+                    checkLevelComplete();
+                } else {
+                    unflipCards();
+                }
+            }
+            
+            // Deshabilitar cartas coincidentes
+            function disableCards() {
+                firstCard.removeEventListener('click', flipCard);
+                secondCard.removeEventListener('click', flipCard);
+                
+                resetBoard();
+            }
+            
+            // Voltear cartas no coincidentes
+            function unflipCards() {
+                lockBoard = true;
+                
+                setTimeout(() => {
+                    firstCard.classList.remove('flipped');
+                    secondCard.classList.remove('flipped');
+                    
+                    resetBoard();
+                }, 1000);
+            }
+            
+            // Reiniciar tablero
+            function resetBoard() {
+                [hasFlippedCard, lockBoard] = [false, false];
+                [firstCard, secondCard] = [null, null];
+            }
+            
+            // Comprobar si nivel está completo
+            function checkLevelComplete() {
+                const allFlipped = [...cards].every(card => card.classList.contains('flipped'));
+                
+                if (allFlipped) {
+                    clearInterval(timerInterval);
+                    
+                    // Calcular puntos (más puntos por menos tiempo)
+                    const timeLimit = 30 + (level * 5);
+                    const levelPoints = Math.max(timeLimit - time, 10) * 10;
+                    points += levelPoints;
+                    
+                    // Mostrar pantalla de nivel completado
+                    completeTime.textContent = time;
+                    completePoints.textContent = levelPoints;
+                    completeLevel.textContent = level;
+                    
+                    setTimeout(() => {
+                        levelComplete.classList.add('show');
+                        createConfetti();
+                    }, 1000);
+                }
+            }
+            
+            // Siguiente nivel
+            function nextLevel() {
+                level++;
+                time = 0;
+                cards = [];
+                
+                if (level > 50 || usedWords.size >= wordImageDictionary.length) {
+                    // Juego completado
+                    alert('¡Congratulations! You have completed all levels.');
+                    backToMenu();
+                    return;
+                }
+                
+                levelComplete.classList.remove('show');
+                startLevel();
+                showScreen(gameScreen);
+            }
+            
+            // Mostrar pista
+            function showHint() {
+                if (points < 50) return;
+                
+                // Encontrar cartas no volteadas
+                const unflippedCards = cards.filter(card => !card.classList.contains('flipped'));
+                if (unflippedCards.length < 2) return;
+                
+                // Restar puntos por usar pista
+                points -= 50;
+                updateStats();
+                
+                lockBoard = true;
+                
+                // Encontrar un par sin voltear
+                const unflippedValues = {};
+                let matchFound = false;
+                let card1, card2;
+                
+                for (const card of unflippedCards) {
+                    const matchValue = card.dataset.matchValue;
+                    
+                    if (unflippedValues[matchValue]) {
+                        card1 = unflippedValues[matchValue];
+                        card2 = card;
+                        matchFound = true;
+                        break;
+                    } else {
+                        unflippedValues[matchValue] = card;
+                    }
+                }
+                
+                if (matchFound) {
+                    // Voltear el par brevemente
+                    card1.classList.add('flipped');
+                    card2.classList.add('flipped');
+                    
+                    setTimeout(() => {
+                        card1.classList.remove('flipped');
+                        card2.classList.remove('flipped');
+                        
+                        setTimeout(() => {
+                            lockBoard = false;
+                        }, 300);
+                    }, 1500);
+                } else {
+                    lockBoard = false;
+                }
+            }
+            
+            // Iniciar temporizador
+            function startTimer() {
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    time++;
+                    updateStats();
+                }, 1000);
+            }
+            
+            // Actualizar estadísticas
+            function updateStats() {
+                levelElement.textContent = level;
+                timerElement.textContent = `${time}s`;
+                pointsElement.textContent = points;
+            }
+            
+            // Crear confeti
+            function createConfetti() {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+                const container = document.querySelector('.level-content');
+                
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = Math.random() * 10 + 5 + 'px';
+                    confetti.style.height = Math.random() * 10 + 5 + 'px';
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    container.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }
+            }
+            
+            // Inicializar el juego
+            initEvents();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Master - Phrasal Verbs & Prepositions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            color: #ffdd00;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        /* Botón de menú principal */
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* Pantallas del juego */
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        /* Menú principal */
+        .main-menu {
+            text-align: center;
+        }
+        
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .menu-btn {
+            padding: 16px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            background: linear-gradient(to right, #3494e6, #ec6ead);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .menu-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Información del juego */
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            display: flex;
+            flex-direction: column;
+            padding: 0 15px;
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #ffdd00;
+        }
+        
+        /* Tablero de juego */
+        .game-board {
+            display: grid;
+            gap: 10px;
+            margin: 0 auto 25px;
+            perspective: 1000px;
+        }
+        
+        .card {
+            height: 120px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 10px;
+        }
+        
+        .card-front {
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+            transform: rotateY(180deg);
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            flex-direction: column;
+        }
+        
+        .card-front.verb-card {
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+        }
+        
+        .card-front.preposition-card {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            color: #333;
+        }
+        
+        .card-front.meaning-card {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+        }
+        
+        .card-back {
+            background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b);
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .example {
+            font-size: 0.8rem;
+            font-style: italic;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+        
+        /* Controles */
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(to right, #3494e6, #ec6ead);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .control-btn.pause {
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+        }
+        
+        /* Mensaje de nivel completado */
+        .level-complete {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+        
+        .level-complete.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .level-content {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .level-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ffdd00;
+        }
+        
+        .level-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .level-stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffdd00;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        /* Objetivo del nivel */
+        .level-objective {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 1.1rem;
+        }
+        
+        /* Confeti */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0.8;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .home-btn {
+                top: 15px;
+                left: 15px;
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .info-box {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 10px;
+            }
+            
+            .card {
+                height: 100px;
+            }
+            
+            .card-front {
+                font-size: 0.9rem;
+            }
+            
+            .example {
+                font-size: 0.7rem;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .home-btn {
+                top: 10px;
+                left: 10px;
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+            
+            .card {
+                height: 90px;
+            }
+            
+            .card-back {
+                font-size: 1.5rem;
+            }
+            
+            .card-front {
+                font-size: 0.8rem;
+                padding: 5px;
+            }
+            
+            .example {
+                display: none;
+            }
+            
+            .control-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .game-board {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Botón de menú principal (AHORA VISIBLE EN TODAS LAS PANTALLAS) -->
+        <button class="home-btn" id="home-btn">
+            <i class="fas fa-home"></i>
+        </button>
+        
+        <h1><i class="fas fa-brain"></i> Memory Master</h1>
+        <p class="subtitle">Match phrasal verbs with their meanings and prepositions</p>
+        
+        <!-- Pantalla de Menú Principal -->
+        <div class="screen main-menu active" id="menu-screen">
+            <div class="menu-buttons">
+                <button class="menu-btn" id="start-btn"><i class="fas fa-play"></i> Start Game</button>
+                <button class="menu-btn" id="instructions-btn"><i class="fas fa-book"></i> Instructions</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Juego -->
+        <div class="screen" id="game-screen">
+            <div class="level-objective" id="level-objective">
+                Match each phrasal verb with its meaning
+            </div>
+            
+            <div class="game-info">
+                <div class="info-box">
+                    <span class="info-label">Level</span>
+                    <span class="info-value" id="level">1</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Time</span>
+                    <span class="info-value" id="timer">0s</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Points</span>
+                    <span class="info-value" id="points">0</span>
+                </div>
+            </div>
+            
+            <div class="game-board" id="game-board"></div>
+            
+            <div class="controls">
+                <button class="control-btn pause" id="pause-btn"><i class="fas fa-pause"></i> Pause</button>
+                <button class="control-btn" id="hint-btn"><i class="fas fa-lightbulb"></i> Hint</button>
+                <button class="control-btn" id="menu-btn"><i class="fas fa-home"></i> Menu</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Pausa -->
+        <div class="screen" id="pause-screen">
+            <h2>Game Paused</h2>
+            <div class="controls">
+                <button class="control-btn" id="resume-btn"><i class="fas fa-play"></i> Continue</button>
+                <button class="control-btn" id="restart-btn"><i class="fas fa-redo"></i> Restart Level</button>
+                <button class="control-btn" id="main-menu-btn"><i class="fas fa-home"></i> Main Menu</button>
+            </div>
+        </div>
+        
+        <!-- Pantalla de Instrucciones -->
+        <div class="screen" id="instructions-screen">
+            <h2>Instructions</h2>
+            <div style="text-align: left; margin: 20px 0; line-height: 1.6;">
+                <p><i class="fas fa-check-circle"></i> Match phrasal verbs with their meanings and prepositions.</p>
+                <p><i class="fas fa-check-circle"></i> Each level has a different matching challenge.</p>
+                <p><i class="fas fa-check-circle"></i> Level 1-5: Match verbs with prepositions</p>
+                <p><i class="fas fa-check-circle"></i> Level 6-10: Match phrasal verbs with meanings</p>
+                <p><i class="fas fa-check-circle"></i> Level 11+: Complete phrasal verbs with correct prepositions</p>
+                <p><i class="fas fa-check-circle"></i> You earn points based on your speed.</p>
+                <p><i class="fas fa-check-circle"></i> Use the hint button if you need help (reduces points).</p>
+                <p><i class="fas fa-check-circle"></i> Complete all levels to become a Phrasal Verb Master!</p>
+            </div>
+            <button class="control-btn" id="back-btn"><i class="fas fa-arrow-left"></i> Back to Menu</button>
+        </div>
+    </div>
+    
+    <!-- Mensaje de Nivel Completado -->
+    <div class="level-complete" id="level-complete">
+        <div class="level-content">
+            <h2>Level Complete! <i class="fas fa-trophy"></i></h2>
+            
+            <div class="level-stats">
+                <div class="level-stat">
+                    <div class="stat-value" id="complete-time">0</div>
+                    <div class="stat-label">Seconds</div>
+                </div>
+                <div class="level-stat">
+                    <div class="stat-value" id="complete-points">0</div>
+                    <div class="stat-label">Points</div>
+                </div>
+                <div class="level-stat">
+                    <div class="stat-value" id="complete-level">1</div>
+                    <div class="stat-label">Level</div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" id="next-level-btn">Next Level <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elementos del DOM
+            const menuScreen = document.getElementById('menu-screen');
+            const gameScreen = document.getElementById('game-screen');
+            const pauseScreen = document.getElementById('pause-screen');
+            const instructionsScreen = document.getElementById('instructions-screen');
+            const levelComplete = document.getElementById('level-complete');
+            const levelObjective = document.getElementById('level-objective');
+            const homeBtn = document.getElementById('home-btn');
+            
+            const gameBoard = document.getElementById('game-board');
+            const levelElement = document.getElementById('level');
+            const timerElement = document.getElementById('timer');
+            const pointsElement = document.getElementById('points');
+            
+            const startBtn = document.getElementById('start-btn');
+            const instructionsBtn = document.getElementById('instructions-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resumeBtn = document.getElementById('resume-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const hintBtn = document.getElementById('hint-btn');
+            const menuBtn = document.getElementById('menu-btn');
+            const mainMenuBtn = document.getElementById('main-menu-btn');
+            const backBtn = document.getElementById('back-btn');
+            const nextLevelBtn = document.getElementById('next-level-btn');
+            
+            const completeTime = document.getElementById('complete-time');
+            const completePoints = document.getElementById('complete-points');
+            const completeLevel = document.getElementById('complete-level');
+            
+            // Variables del juego
+            let cards = [];
+            let hasFlippedCard = false;
+            let lockBoard = false;
+            let firstCard, secondCard;
+            let level = 1;
+            let time = 0;
+            let points = 0;
+            let timerInterval;
+            let gamePaused = false;
+            let usedPhrasalVerbs = new Set();
+            
+            // Diccionario de phrasal verbs
+            const phrasalVerbsDictionary = [
+                {
+                    verb: "Look",
+                    preposition: "up",
+                    meaning: "Search for information",
+                    example: "I need to look up this word in the dictionary."
+                },
+                {
+                    verb: "Give",
+                    preposition: "up",
+                    meaning: "Stop trying",
+                    example: "Don't give up on your dreams."
+                },
+                {
+                    verb: "Turn",
+                    preposition: "on",
+                    meaning: "Activate/Start",
+                    example: "Please turn on the lights."
+                },
+                {
+                    verb: "Turn",
+                    preposition: "off",
+                    meaning: "Deactivate/Stop",
+                    example: "Don't forget to turn off the TV."
+                },
+                {
+                    verb: "Put",
+                    preposition: "on",
+                    meaning: "Wear clothing",
+                    example: "Put on your coat, it's cold outside."
+                },
+                {
+                    verb: "Take",
+                    preposition: "off",
+                    meaning: "Remove clothing",
+                    example: "You can take off your shoes inside."
+                },
+                {
+                    verb: "Get",
+                    preposition: "up",
+                    meaning: "Rise from bed",
+                    example: "I usually get up at 7 AM."
+                },
+                {
+                    verb: "Break",
+                    preposition: "down",
+                    meaning: "Stop functioning",
+                    example: "My car broke down on the highway."
+                },
+                {
+                    verb: "Call",
+                    preposition: "off",
+                    meaning: "Cancel",
+                    example: "They had to call off the meeting."
+                },
+                {
+                    verb: "Bring",
+                    preposition: "up",
+                    meaning: "Mention",
+                    example: "Don't bring up that topic again."
+                },
+                {
+                    verb: "Find",
+                    preposition: "out",
+                    meaning: "Discover",
+                    example: "I need to find out what happened."
+                },
+                {
+                    verb: "Go",
+                    preposition: "on",
+                    meaning: "Continue",
+                    example: "Please go on with your story."
+                },
+                {
+                    verb: "Come",
+                    preposition: "across",
+                    meaning: "Find unexpectedly",
+                    example: "I came across an old photo album."
+                },
+                {
+                    verb: "Run",
+                    preposition: "into",
+                    meaning: "Meet unexpectedly",
+                    example: "I ran into an old friend at the mall."
+                },
+                {
+                    verb: "Look",
+                    preposition: "after",
+                    meaning: "Take care of",
+                    example: "Can you look after my dog while I'm away?"
+                },
+                {
+                    verb: "Put",
+                    preposition: "off",
+                    meaning: "Postpone",
+                    example: "Let's put off the meeting until next week."
+                },
+                {
+                    verb: "Set",
+                    preposition: "up",
+                    meaning: "Arrange/Organize",
+                    example: "We need to set up a new system."
+                },
+                {
+                    verb: "Take",
+                    preposition: "after",
+                    meaning: "Resemble a family member",
+                    example: "She takes after her mother."
+                },
+                {
+                    verb: "Look",
+                    preposition: "forward to",
+                    meaning: "Anticipate with pleasure",
+                    example: "I look forward to seeing you soon."
+                },
+                {
+                    verb: "Get",
+                    preposition: "along with",
+                    meaning: "Have a good relationship",
+                    example: "I get along with my colleagues."
+                }
+            ];
+
+            // Preposiciones comunes
+            const prepositionsList = [
+                "up", "down", "on", "off", "in", "out", "into", "across", 
+                "after", "along", "about", "around", "at", "before", "behind", 
+                "beyond", "by", "for", "from", "of", "over", "through", "to", 
+                "toward", "under", "until", "with", "within", "without"
+            ];
+            
+            // Inicializar eventos
+            function initEvents() {
+                startBtn.addEventListener('click', startGame);
+                instructionsBtn.addEventListener('click', showInstructions);
+                pauseBtn.addEventListener('click', pauseGame);
+                resumeBtn.addEventListener('click', resumeGame);
+                restartBtn.addEventListener('click', restartLevel);
+                hintBtn.addEventListener('click', showHint);
+                menuBtn.addEventListener('click', backToMenu);
+                mainMenuBtn.addEventListener('click', backToMenu);
+                backBtn.addEventListener('click', backToMenuFromInstructions);
+                nextLevelBtn.addEventListener('click', nextLevel);
+                homeBtn.addEventListener('click', backToMenu);
+            }
+            
+            // Cambiar pantalla
+            function showScreen(screen) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                screen.classList.add('active');
+                
+                // El botón de inicio ahora es visible en todas las pantallas
+                homeBtn.style.display = 'flex';
+            }
+            
+            // Iniciar juego
+            function startGame() {
+                level = 1;
+                points = 0;
+                usedPhrasalVerbs.clear();
+                showScreen(gameScreen);
+                startLevel();
+            }
+            
+            // Mostrar instrucciones
+            function showInstructions() {
+                showScreen(instructionsScreen);
+            }
+            
+            // Volver al menú desde instrucciones
+            function backToMenuFromInstructions() {
+                showScreen(menuScreen);
+            }
+            
+            // Volver al menú principal
+            function backToMenu() {
+                clearInterval(timerInterval);
+                showScreen(menuScreen);
+                window.location.href = 'index.html';
+            }
+            
+            // Pausar juego
+            function pauseGame() {
+                gamePaused = true;
+                clearInterval(timerInterval);
+                showScreen(pauseScreen);
+            }
+            
+            // Reanudar juego
+            function resumeGame() {
+                gamePaused = false;
+                showScreen(gameScreen);
+                startTimer();
+            }
+            
+            // Reiniciar nivel
+            function restartLevel() {
+                clearInterval(timerInterval);
+                time = 0;
+                updateStats();
+                startLevel();
+                showScreen(gameScreen);
+            }
+            
+            // Iniciar nivel
+            function startLevel() {
+                // Limpiar tablero
+                gameBoard.innerHTML = '';
+                cards = [];
+                
+                // Establecer objetivo del nivel
+                if (level <= 5) {
+                    levelObjective.textContent = "Match each verb with its correct preposition";
+                    createVerbPrepositionLevel();
+                } else if (level <= 10) {
+                    levelObjective.textContent = "Match each phrasal verb with its meaning";
+                    createPhrasalMeaningLevel();
+                } else {
+                    levelObjective.textContent = "Complete the phrasal verb with the correct preposition";
+                    createCompletePhrasalLevel();
+                }
+                
+                // Iniciar temporizador
+                startTimer();
+                
+                // Actualizar estadísticas
+                updateStats();
+            }
+            
+            // Crear nivel de verbo + preposición (Niveles 1-5)
+            function createVerbPrepositionLevel() {
+                // Calcular número de pares según nivel (mínimo 4, máximo 8 pares)
+                const pairs = Math.min(4 + Math.floor(level / 2), 8);
+                
+                // Obtener phrasal verbs para este nivel
+                const availableItems = phrasalVerbsDictionary.filter(item => !usedPhrasalVerbs.has(item.verb + item.preposition));
+                const levelItems = availableItems.sort(() => 0.5 - Math.random()).slice(0, pairs);
+                
+                // Añadir phrasal verbs usados
+                levelItems.forEach(item => usedPhrasalVerbs.add(item.verb + item.preposition));
+                
+                // Crear cartas (verbo y preposición para cada phrasal verb)
+                const cardValues = [];
+                
+                levelItems.forEach(item => {
+                    // Carta de verbo
+                    cardValues.push({
+                        type: 'verb',
+                        value: item.verb,
+                        matchValue: item.verb + item.preposition,
+                        fullPhrasalVerb: item.verb + " " + item.preposition,
+                        example: item.example
+                    });
+                    
+                    // Carta de preposición
+                    cardValues.push({
+                        type: 'preposition',
+                        value: item.preposition,
+                        matchValue: item.verb + item.preposition,
+                        fullPhrasalVerb: item.verb + " " + item.preposition,
+                        example: item.example
+                    });
+                });
+                
+                // Mezclar cartas
+                const shuffledCards = cardValues.sort(() => 0.5 - Math.random());
+                
+                // Configurar grid según número de cartas
+                const columns = pairs <= 4 ? 4 : 5;
+                gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+                
+                // Crear cartas en el DOM
+                shuffledCards.forEach(cardData => {
+                    const card = createCardElement(cardData);
+                    gameBoard.appendChild(card);
+                    cards.push(card);
+                });
+            }
+            
+            // Crear nivel de phrasal verb + significado (Niveles 6-10)
+            function createPhrasalMeaningLevel() {
+                // Calcular número de pares según nivel (mínimo 4, máximo 8 pares)
+                const pairs = Math.min(4 + Math.floor((level-5) / 2), 8);
+                
+                // Obtener phrasal verbs para este nivel
+                const availableItems = phrasalVerbsDictionary.filter(item => !usedPhrasalVerbs.has(item.verb + item.preposition));
+                const levelItems = availableItems.sort(() => 0.5 - Math.random()).slice(0, pairs);
+                
+                // Añadir phrasal verbs usados
+                levelItems.forEach(item => usedPhrasalVerbs.add(item.verb + item.preposition));
+                
+                // Crear cartas (phrasal verb completo y significado para cada phrasal verb)
+                const cardValues = [];
+                
+                levelItems.forEach(item => {
+                    // Carta de phrasal verb completo
+                    cardValues.push({
+                        type: 'phrasal',
+                        value: item.verb + " " + item.preposition,
+                        matchValue: item.verb + item.preposition,
+                        fullPhrasalVerb: item.verb + " " + item.preposition,
+                        example: item.example
+                    });
+                    
+                    // Carta de significado
+                    cardValues.push({
+                        type: 'meaning',
+                        value: item.meaning,
+                        matchValue: item.verb + item.preposition,
+                        fullPhrasalVerb: item.verb + " " + item.preposition,
+                        example: item.example
+                    });
+                });
+                
+                // Mezclar cartas
+                const shuffledCards = cardValues.sort(() => 0.5 - Math.random());
+                
+                // Configurar grid según número de cartas
+                const columns = pairs <= 4 ? 4 : 5;
+                gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+                
+                // Crear cartas en el DOM
+                shuffledCards.forEach(cardData => {
+                    const card = createCardElement(cardData);
+                    gameBoard.appendChild(card);
+                    cards.push(card);
+                });
+            }
+            
+            // Crear nivel de completar phrasal verbs (Niveles 11+)
+            function createCompletePhrasalLevel() {
+                // Calcular número de pares según nivel (mínimo 4, máximo 8 pares)
+                const pairs = Math.min(4 + Math.floor((level-10) / 3), 8);
+                
+                // Obtener phrasal verbs para este nivel
+                const availableItems = phrasalVerbsDictionary.filter(item => !usedPhrasalVerbs.has(item.verb + item.preposition));
+                const levelItems = availableItems.sort(() => 0.5 - Math.random()).slice(0, pairs);
+                
+                // Añadir phrasal verbs usados
+                levelItems.forEach(item => usedPhrasalVerbs.add(item.verb + item.preposition));
+                
+                // Crear cartas (verbo + "____" y preposición correcta para cada phrasal verb)
+                const cardValues = [];
+                
+                levelItems.forEach(item => {
+                    // Carta de verbo con espacio en blanco
+                    cardValues.push({
+                        type: 'incomplete',
+                        value: item.verb + " _____",
+                        matchValue: item.verb + item.preposition,
+                        fullPhrasalVerb: item.verb + " " + item.preposition,
+                        example: item.example
+                    });
+                    
+                    // Carta de preposición correcta
+                    cardValues.push({
+                        type: 'preposition',
+                        value: item.preposition,
+                        matchValue: item.verb + item.preposition,
+                        fullPhrasalVerb: item.verb + " " + item.preposition,
+                        example: item.example
+                    });
+                    
+                    // Añadir 1-2 preposiciones incorrectas según el nivel
+                    const incorrectPrepositions = prepositionsList
+                        .filter(p => p !== item.preposition)
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, level > 13 ? 2 : 1);
+                    
+                    incorrectPrepositions.forEach(prep => {
+                        cardValues.push({
+                            type: 'preposition',
+                            value: prep,
+                            matchValue: item.verb + item.preposition + '-incorrect',
+                            fullPhrasalVerb: item.verb + " " + item.preposition,
+                            example: item.example,
+                            isIncorrect: true
+                        });
+                    });
+                });
+                
+                // Mezclar cartas
+                const shuffledCards = cardValues.sort(() => 0.5 - Math.random());
+                
+                // Configurar grid según número de cartas
+                const columns = 5;
+                gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+                
+                // Crear cartas en el DOM
+                shuffledCards.forEach(cardData => {
+                    const card = createCardElement(cardData);
+                    gameBoard.appendChild(card);
+                    cards.push(card);
+                });
+            }
+            
+            // Crear elemento de carta
+            function createCardElement(cardData) {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.matchValue = cardData.matchValue;
+                
+                const cardFront = document.createElement('div');
+                
+                if (cardData.type === 'verb') {
+                    cardFront.classList.add('card-front', 'verb-card');
+                    cardFront.innerHTML = `<div>${cardData.value}</div>`;
+                } else if (cardData.type === 'preposition') {
+                    cardFront.classList.add('card-front', 'preposition-card');
+                    cardFront.innerHTML = `<div>${cardData.value}</div>`;
+                    if (cardData.isIncorrect) {
+                        cardFront.style.background = 'linear-gradient(135deg, #ff6b6b, #ff8e8e)';
+                    }
+                } else if (cardData.type === 'phrasal') {
+                    cardFront.classList.add('card-front', 'verb-card');
+                    cardFront.innerHTML = `<div>${cardData.value}</div>`;
+                } else if (cardData.type === 'incomplete') {
+                    cardFront.classList.add('card-front', 'verb-card');
+                    cardFront.innerHTML = `<div>${cardData.value}</div>`;
+                } else {
+                    cardFront.classList.add('card-front', 'meaning-card');
+                    cardFront.innerHTML = `
+                        <div>${cardData.value}</div>
+                        <div class="example">${cardData.example}</div>
+                    `;
+                }
+                
+                const cardBack = document.createElement('div');
+                cardBack.classList.add('card-back');
+                cardBack.innerHTML = '<i class="fas fa-question"></i>';
+                
+                card.appendChild(cardFront);
+                card.appendChild(cardBack);
+                
+                card.addEventListener('click', flipCard);
+                return card;
+            }
+            
+            // Voltear carta
+            function flipCard() {
+                if (lockBoard || gamePaused) return;
+                if (this === firstCard) return;
+                
+                this.classList.add('flipped');
+                
+                if (!hasFlippedCard) {
+                    // Primer click
+                    hasFlippedCard = true;
+                    firstCard = this;
+                    return;
+                }
+                
+                // Segundo click
+                secondCard = this;
+                checkForMatch();
+            }
+            
+            // Comprobar coincidencia
+            function checkForMatch() {
+                let isMatch = false;
+                
+                // Para niveles 11+ con opciones incorrectas
+                if (level > 10) {
+                    const firstMatch = firstCard.dataset.matchValue;
+                    const secondMatch = secondCard.dataset.matchValue;
+                    
+                    // Verificar si es una combinación correcta (no contiene "-incorrect")
+                    isMatch = firstMatch === secondMatch && !firstMatch.includes('-incorrect') && !secondMatch.includes('-incorrect');
+                } else {
+                    // Para niveles normales
+                    isMatch = firstCard.dataset.matchValue === secondCard.dataset.matchValue;
+                }
+                
+                if (isMatch) {
+                    disableCards();
+                    checkLevelComplete();
+                } else {
+                    unflipCards();
+                }
+            }
+            
+            // Deshabilitar cartas coincidentes
+            function disableCards() {
+                firstCard.removeEventListener('click', flipCard);
+                secondCard.removeEventListener('click', flipCard);
+                
+                resetBoard();
+            }
+            
+            // Voltear cartas no coincidentes
+            function unflipCards() {
+                lockBoard = true;
+                
+                setTimeout(() => {
+                    firstCard.classList.remove('flipped');
+                    secondCard.classList.remove('flipped');
+                    
+                    resetBoard();
+                }, 1000);
+            }
+            
+            // Reiniciar tablero
+            function resetBoard() {
+                [hasFlippedCard, lockBoard] = [false, false];
+                [firstCard, secondCard] = [null, null];
+            }
+            
+            // Comprobar si nivel está completo
+            function checkLevelComplete() {
+                // Para niveles 11+, necesitamos verificar solo los pares correctos
+                let allFlipped;
+                
+                if (level > 10) {
+                    // Contar solo las cartas que son parte de pares correctos
+                    const correctCards = cards.filter(card => !card.dataset.matchValue.includes('-incorrect'));
+                    allFlipped = correctCards.every(card => card.classList.contains('flipped'));
+                } else {
+                    // Para niveles normales
+                    allFlipped = cards.every(card => card.classList.contains('flipped'));
+                }
+                
+                if (allFlipped) {
+                    clearInterval(timerInterval);
+                    
+                    // Calcular puntos (más puntos por menos tiempo)
+                    const timeLimit = 30 + (level * 5);
+                    const levelPoints = Math.max(timeLimit - time, 10) * 10;
+                    points += levelPoints;
+                    
+                    // Mostrar pantalla de nivel completado
+                    completeTime.textContent = time;
+                    completePoints.textContent = levelPoints;
+                    completeLevel.textContent = level;
+                    
+                    setTimeout(() => {
+                        levelComplete.classList.add('show');
+                        createConfetti();
+                    }, 1000);
+                }
+            }
+            
+            // Siguiente nivel
+            function nextLevel() {
+                level++;
+                time = 0;
+                cards = [];
+                
+                if (level > 15 || usedPhrasalVerbs.size >= phrasalVerbsDictionary.length) {
+                    // Juego completado
+                    alert('¡Congratulations! You have completed all levels.');
+                    backToMenu();
+                    return;
+                }
+                
+                levelComplete.classList.remove('show');
+                startLevel();
+                showScreen(gameScreen);
+            }
+            
+            // Mostrar pista
+            function showHint() {
+                if (points < 50) {
+                    alert("You don't have enough points for a hint (minimum 50 points required)");
+                    return;
+                }
+                
+                // Restar puntos por usar pista
+                points -= 50;
+                updateStats();
+                
+                // Encontrar cartas no volteadas
+                const unflippedCards = cards.filter(card => !card.classList.contains('flipped'));
+                if (unflippedCards.length < 2) return;
+                
+                // Encontrar un par que coincida
+                let matchFound = false;
+                
+                for (let i = 0; i < unflippedCards.length && !matchFound; i++) {
+                    for (let j = i + 1; j < unflippedCards.length && !matchFound; j++) {
+                        if (unflippedCards[i].dataset.matchValue === unflippedCards[j].dataset.matchValue) {
+                            // Mostrar pista parpadeando las cartas
+                            unflippedCards[i].style.boxShadow = "0 0 15px 5px yellow";
+                            unflippedCards[j].style.boxShadow = "0 0 15px 5px yellow";
+                            
+                            setTimeout(() => {
+                                unflippedCards[i].style.boxShadow = "";
+                                unflippedCards[j].style.boxShadow = "";
+                            }, 2000);
+                            
+                            matchFound = true;
+                        }
+                    }
+                }
+            }
+            
+            // Iniciar temporizador
+            function startTimer() {
+                clearInterval(timerInterval);
+                time = 0;
+                updateStats();
+                
+                timerInterval = setInterval(() => {
+                    if (!gamePaused) {
+                        time++;
+                        updateStats();
+                    }
+                }, 1000);
+            }
+            
+            // Actualizar estadísticas
+            function updateStats() {
+                levelElement.textContent = level;
+                timerElement.textContent = `${time}s`;
+                pointsElement.textContent = points;
+            }
+            
+            // Crear efecto de confeti
+            function createConfetti() {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+                const container = document.querySelector('body');
+                
+                for (let i = 0; i < 100; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-10px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    container.appendChild(confetti);
+                    
+                    // Animación
+                    const animation = confetti.animate([
+                        { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                        { transform: `translateY(100vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                    ], {
+                        duration: Math.random() * 3000 + 2000,
+                        easing: 'cubic-bezier(0.1, 0.8, 0.1, 1)'
+                    });
+                    
+                    animation.onfinish = () => {
+                        confetti.remove();
+                    };
+                }
+            }
+            
+            // Inicializar el juego
+            initEvents();
+        });
+    </script>
+</body>
+</html>
